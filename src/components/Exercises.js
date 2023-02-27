@@ -11,9 +11,26 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const exercisesPerPage = 9;
 
+    useEffect(() => {
+        const fetchExercisesData = async () => {
+          let exercisesData = [];
+    
+          if (bodyPart === 'all') {
+            exercisesData = await fetchData('https://exercisedb.p.rapidapi.com/exercises', exerciseOptions);
+          } else {
+            exercisesData = await fetchData(`https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}`, exerciseOptions);
+          }
+    
+          setExercises(exercisesData);
+        };
+    
+        fetchExercisesData(setExercises);
+      }, [bodyPart, setExercises]);
+
+
     const indexOfLastExercise = currentPage * exercisesPerPage;
     const indexOfFirstExercise = indexOfLastExercise - exercisesPerPage;
-    const currentExercises = exercises.slice(indexOfFirstExercise, indexOfLastExercise);
+    const currentExercises = Array.isArray(exercises) ? exercises.slice(indexOfFirstExercise, indexOfLastExercise) : [];
 
     const paginate = (e, value) => {
         setCurrentPage(value);
@@ -22,9 +39,7 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
 
     }
 
-    useEffect(() => {
 
-    }, [bodyPart])
 
   return (
     <Box id="exercises" sx={{ mt: { lg: "109px" } }} mt="50px" p="20px">
@@ -42,8 +57,8 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
         flexWrap="wrap"
         justifyContent="center"
       >
-        {currentExercises.map((exercise, idx) => (
-          <ExerciseCard key={idx} exercise={exercise} />
+        {currentExercises.map((exercise, index) => (
+          <ExerciseCard key={index} exercise={exercise} />
         ))}
       </Stack>
       <Stack mt='100px' alignItems='center'>
@@ -53,7 +68,7 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
                 shape='rounded'
                 defaultPage={1}
                 count={Math.ceil(exercises.length / exercisesPerPage)}
-                // page={currentPage}
+                page={currentPage}
                 onChange={paginate}
                 size='large'
             />
